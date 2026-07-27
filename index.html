@@ -778,6 +778,27 @@
             requestAnimationFrame(raf);
         }
 
+        // --- Anchor Link Scroll Fix ---
+        // Intercept all internal anchor links to use Lenis.scrollTo
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return; // Ignore plain '#' links
+                
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault(); // Prevent default instant jump
+                    if (lenis) {
+                        // Use Lenis for smooth scroll with an 80px offset for the navbar
+                        lenis.scrollTo(target, { offset: -80 });
+                    } else {
+                        // Fallback for reduced motion (Lenis disabled)
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+
         // --- Custom Cursor Logic ---
         const dot = document.getElementById('cursor-dot');
         const ring = document.getElementById('cursor-ring');
