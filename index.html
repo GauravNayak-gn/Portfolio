@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaurav Nayak — Backend & AI Software Engineer</title>
+    <meta name="description" content="Software Engineer specializing in backend development, RAG pipelines, and security compliance.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: 'var(--bg)',
+                        fg: 'var(--fg)',
+                        surface: 'var(--surface)',
+                        accent: 'var(--accent)',
+                        'accent-2': 'var(--accent-2)',
+                        muted: 'var(--muted)',
+                        line: 'var(--line)'
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg: #0A0A0B;
+            --fg: #FAFAFA;
+            --surface: #131316;
+            --accent: #4F46E5; /* Indigo */
+            --accent-2: #06B6D4; /* Cyan */
+            --muted: #8B8B93;
+            --line: #27272A;
+        }
+
+        [data-theme="light"] {
+            --bg: #FAFAFA;
+            --fg: #050505;
+            --surface: #FFFFFF;
+            --accent: #4338CA;
+            --accent-2: #0891B2;
+            --muted: #666666;
+            --line: #E5E5E5;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        html, body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        body {
+            cursor: none;
+        }
+
+        /* Hide custom cursor on touch devices */
+        @media (hover: none) {
+            body { cursor: auto; }
+            #cursor-dot, #cursor-ring { display: none !important; }
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+        .display { font-weight: 700; letter-spacing: -0.04em; line-height: 0.9; }
+
+        /* Custom Cursor */
+        #cursor-dot {
+            position: fixed;
+            top: 0; left: 0;
+            width: 6px; height: 6px;
+            background: #FFFFFF; /* Hardcoded white for mix-blend-mode to invert correctly */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: width 0.2s ease, height 0.2s ease, background 0.2s ease;
+        }
+        #cursor-ring {
+            position: fixed;
+            top: 0; left: 0;
+            width: 36px; height: 36px;
+            border: 1.5px solid #FFFFFF; /* Hardcoded white */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            mix-blend-mode: difference;
+            transition: transform 0.15s ease-out, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+        }
+        .cursor-hover #cursor-dot { width: 0; height: 0; }
+        .cursor-hover #cursor-ring { width: 56px; height: 56px; border-color: var(--accent-2); }
+
+        /* WebGL Background */
+        #fluid-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -1;
+        }
+
+        /* Layout Elements */
+        .container-pad { padding-left: clamp(1.5rem, 5vw, 6rem); padding-right: clamp(1.5rem, 5vw, 6rem); }
+        
+        /* Accessibility: Focus States */
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--accent-2);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        /* Kinetic Text Reveal */
+        .reveal-mask {
+            overflow: hidden;
+            display: block;
+            padding-bottom: 0.1em; /* Prevent clipping of descenders */
+            margin-bottom: -0.1em;
+        }
+        .reveal-text {
+            display: block;
+            transform: translateY(110%);
+            transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .is-visible .reveal-text { transform: translateY(0); }
+
+        /* Brutalist Buttons */
+        .brutalist-btn {
+            position: relative;
+            border: 1px solid var(--fg);
+            padding: 1rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--fg);
+            background: transparent;
+            overflow: hidden;
+            transition: color 0.4s ease;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .brutalist-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--accent);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+            z-index: -1;
+        }
+        .brutalist-btn:hover { color: #FFFFFF; border-color: var(--accent); }
+        .brutalist-btn:hover::before { transform: translateY(0); }
+        .brutalist-btn-primary { border-color: var(--accent); color: var(--accent); }
+        .brutalist-btn-primary:hover { color: #FFFFFF; }
+
+        /* Navbar */
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+            color: var(--fg);
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        .nav-link:hover { opacity: 1; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-2);
+            transition: width 0.3s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .nav-link:hover::after { width: 100%; }
+        
+        .status-pill {
+            border: 1px solid var(--line);
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface);
+            font-size: 0.7rem;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            border: 1px solid var(--line);
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+            color: var(--fg);
+            transition: border-color 0.3s ease, transform 0.3s ease;
+            cursor: none;
+        }
+        .theme-toggle:hover { border-color: var(--accent); transform: rotate(15deg); }
+        .theme-toggle svg { width: 16px; height: 16px; }
+
+        /* Uniform Work Cards */
+        .work-card {
+            position: relative;
+            background-color: var(--surface);
+            border: 1px solid var(--line);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: border-color 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            min-height: 320px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .work-card:hover { 
+            border-color: var(--accent); 
+            transform: translateY(-6px);
+        }
+        
+        .work-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .work-card:hover::before { opacity: 1; }
+
+        .work-title { transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1); }
+        .work-card:hover .work-title { transform: translateX(8px); }
+
+        .work-github {
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            color: var(--accent);
+        }
+        .work-card:hover .work-github {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .tech-tag {
+            border: 1px solid var(--line);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--muted);
+            background: var(--bg);
+            transition: border-color 0.3s, color 0.3s;
+        }
+        .work-card:hover .tech-tag { border-color: var(--fg); color: var(--fg); }
+
+        /* Experience Metrics */
+        .metric-large {
+            font-size: clamp(3.5rem, 8vw, 8rem);
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--fg);
+            transition: color 0.3s ease, -webkit-text-stroke 0.3s ease;
+        }
+        .metric-card:hover .metric-large {
+            color: var(--accent);
+            -webkit-text-stroke: 1px var(--accent);
+        }
+        .metric-card { transition: background-color 0.3s ease; }
+        .metric-card:hover { background-color: var(--surface); }
+
+        /* Skills Marquee */
+        .marquee-container { 
+            display: flex; 
+            overflow: hidden; 
+            user-select: none;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-track {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            animation: scroll 40s linear infinite;
+        }
+        .marquee-container:hover .marquee-track { animation-play-state: paused; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        .skill-item {
+            font-size: clamp(2.5rem, 6vw, 6rem);
+            padding: 0 3rem;
+            color: var(--muted);
+            transition: color 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .skill-item:hover { color: var(--accent); }
+
+        /* Responsive About Me */
+        .about-text { font-size: clamp(1.75rem, 3.5vw, 3rem); line-height: 1.2; }
+
+        /* Decode Animation Text */
+        #decode-text { font-family: 'Space Grotesk', sans-serif; }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .reveal-text { transform: translateY(0) !important; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Skip Link for Accessibility -->
+    <a href="#hero" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[10000] focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
+
+    <!-- Custom Cursor -->
+    <div id="cursor-dot" aria-hidden="true"></div>
+    <div id="cursor-ring" aria-hidden="true"></div>
+
+    <!-- WebGL Background -->
+    <canvas id="fluid-canvas" aria-hidden="true"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full z-50" aria-label="Main navigation">
+        <div class="container-pad flex justify-between items-center py-5 font-mono text-xs uppercase tracking-widest">
+            <a href="#hero" data-cursor="hover" class="flex items-center gap-3 group text-fg" aria-label="Home">
+                <span class="w-2.5 h-2.5 border border-fg group-hover:bg-fg transition-colors duration-300"></span>
+                <span>Gaurav Nayak</span>
+            </a>
+            <div class="hidden md:flex gap-10">
+                <a href="#about" data-cursor="hover" class="nav-link">About</a>
+                <a href="#work" data-cursor="hover" class="nav-link">Work</a>
+                <a href="#experience" data-cursor="hover" class="nav-link">Experience</a>
+                <a href="#skills" data-cursor="hover" class="nav-link">Stack</a>
+                <a href="#contact" data-cursor="hover" class="nav-link">Contact</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" class="theme-toggle" data-cursor="hover" aria-label="Toggle theme">
+                    <!-- Icons will be injected by JS -->
+                </button>
+                <div class="status-pill text-fg">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-2 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-accent-2"></span>
+                    </span>
+                    <span>Open</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main id="main-content">
+    <section id="hero" class="relative min-h-screen flex flex-col justify-center container-pad pt-24 md:pt-20 pb-12">
+        <div class="font-mono text-xs uppercase tracking-widest text-muted mb-8 flex flex-wrap gap-4">
+            <span>[ Software Engineer ]</span>
+            <span>[ AI / Backend ]</span>
+            <span>[ Pune, IN ]</span>
+        </div>
+        
+        <h1 class="display text-[14vw] md:text-[12vw] lg:text-[9vw] text-fg mb-8">
+            <span class="reveal-mask"><span class="reveal-text" id="decode-text">Building</span></span>
+            <span class="reveal-mask"><span class="reveal-text" style="transition-delay: 0.1s;">scalable backends</span></span>
+            <span class="reveal-mask"><span class="reveal-text" style="color: var(--accent); transition-delay: 0.2s;">& AI pipelines.</span></span>
+        </h1>
+
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mt-12 border-t border-line pt-8 gap-8">
+            <p class="max-w-md text-muted text-base md:text-lg leading-relaxed">
+                MCA Candidate (AIR 16). I focus on backend development, RAG pipelines, and security compliance. I build software that is reliable, scalable, and built to handle real-world load.
+            </p>
+            <div class="flex gap-4 flex-shrink-0">
+                <a href="#work" class="brutalist-btn" data-cursor="hover">View Work</a>
+                <a href="#contact" class="brutalist-btn brutalist-btn-primary" data-cursor="hover">Get in Touch</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 md:py-32 border-t border-line">
+        <div class="container-pad grid grid-cols-12 gap-8">
+            <div class="col-span-12 md:col-span-3 mb-12 md:mb-0">
+                <div class="md:sticky md:top-32">
+                    <div class="font-mono text-xs uppercase tracking-widest text-muted mb-4">[ 01 / About ]</div>
+                    <div class="font-mono text-xs uppercase tracking-widest text-muted opacity-80 space-y-2">
+                        <p>Based in Pune, IN</p>
+                        <p>MCA Candidate</p>
+                        <p>Status: Active</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-12 md:col-span-9 md:border-l md:border-line md:pl-12">
+                <h2 class="display about-text text-muted mb-12">
+                    <span class="reveal-mask"><span class="reveal-text">I build scalable backends,</span></span>
+                    <span class="reveal-mask"><span class="reveal-text">AI-driven pipelines, and</span></span>
+                    <span class="reveal-mask"><span class="reveal-text text-fg">secure backend systems.</span></span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16 max-w-4xl">
+                    <div>
+                        <div class="font-mono text-xs text-muted mb-3 tracking-widest">[ APPROACH ]</div>
+                        <p class="text-muted leading-relaxed text-sm md:text-base">
+                            I focus on identifying bottlenecks, hardening security, and automating workflows. I write code to solve real engineering problems, prioritizing maintainability and performance.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="font-mono text-xs text-muted mb-3 tracking-widest">[ IMPACT ]</div>
+                        <p class="text-muted leading-relaxed text-sm md:text-base">
+                            From reducing API latency by <span style="color: var(--accent); font-weight: 500;">99%</span> on 1M+ records to building zero-cost AI semantic search, I focus on solving engineering problems with measurable results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work Section -->
+    <section id="work" class="py-24 md:py-32 container-pad border-t border-line">
+        <div class="flex justify-between items-end mb-16">
+            <h2 class="display text-4xl md:text-6xl text-fg">Selected Work</h2>
+            <div class="font-mono text-xs uppercase tracking-widest text-muted hidden md:block">[ 02 / Featured Projects ]</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <!-- Card 1 -->
+            <a href="https://github.com/GauravNayak-gn/job_buddy" target="_blank" rel="noopener noreferrer" class="work-card" data-cursor="hover" aria-label="View Job Buddy on GitHub">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="display work-title text-3xl md:text-4xl text-fg">Job Buddy</h3>
+                        <span class="font-mono text-xs text-muted">01</span>
+                    </div>
+                    <p class="text-muted text-sm md:text-base">AI-powered microservices portal with zero-cost semantic matching and event-driven architecture.</p>
+                </div>
+                <div class="flex justify-between items-end mt-8">
+                    <div class="flex flex-wrap gap-2 font-mono">
+                        <span class="tech-tag">Django</span>
+                        <span class="tech-tag">Kafka</span>
+                        <span class="tech-tag">pgvector</span>
+                    </div>
+                    <div class="work-github font-mono text-xs flex items-center gap-2 font-medium">
+                        View Code 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="https://github.com/GauravNayak-gn/Aegis" target="_blank" rel="noopener noreferrer" class="work-card" data-cursor="hover" aria-label="View Aegis on GitHub">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="display work-title text-3xl md:text-4xl text-fg">Aegis</h3>
+                        <span class="font-mono text-xs text-muted">02</span>
+                    </div>
+                    <p class="text-muted text-sm md:text-base">Intelligent GitHub Triage & Automation Engine.</p>
+                </div>
+                <div class="flex justify-between items-end mt-8">
+                    <div class="flex flex-wrap gap-2 font-mono">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Security</span>
+                        <span class="tech-tag">Django</span>
+                    </div>
+                    <div class="work-github font-mono text-xs flex items-center gap-2 font-medium">
+                        View Code 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="https://github.com/GauravNayak-gn/Research-agent" target="_blank" rel="noopener noreferrer" class="work-card" data-cursor="hover" aria-label="View Research Agent on GitHub">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="display work-title text-3xl md:text-4xl text-fg">Research Agent</h3>
+                        <span class="font-mono text-xs text-muted">03</span>
+                    </div>
+                    <p class="text-muted text-sm md:text-base">Autonomous knowledge synthesis agent leveraging LangChain and multi-provider LLM fallbacks.</p>
+                </div>
+                <div class="flex justify-between items-end mt-8">
+                    <div class="flex flex-wrap gap-2 font-mono">
+                        <span class="tech-tag">LangChain</span>
+                        <span class="tech-tag">OpenAI</span>
+                        <span class="tech-tag">Python</span>
+                    </div>
+                    <div class="work-github font-mono text-xs flex items-center gap-2 font-medium">
+                        View Code 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="https://github.com/GauravNayak-gn/Uniquery" target="_blank" rel="noopener noreferrer" class="work-card" data-cursor="hover" aria-label="View UniQuery on GitHub">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="display work-title text-3xl md:text-4xl text-fg">UniQuery</h3>
+                        <span class="font-mono text-xs text-muted">04</span>
+                    </div>
+                    <p class="text-muted text-sm md:text-base">RAG-powered campus assistant indexing 250+ documents with sub-1.2s context-aware latency.</p>
+                </div>
+                <div class="flex justify-between items-end mt-8">
+                    <div class="flex flex-wrap gap-2 font-mono">
+                        <span class="tech-tag">FastAPI</span>
+                        <span class="tech-tag">ChromaDB</span>
+                        <span class="tech-tag">Gemini</span>
+                    </div>
+                    <div class="work-github font-mono text-xs flex items-center gap-2 font-medium">
+                        View Code 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="https://github.com/GauravNayak-gn/Gesture-Controlled-Gaming" target="_blank" rel="noopener noreferrer" class="work-card" data-cursor="hover" aria-label="View Gesture Gaming on GitHub">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="display work-title text-3xl md:text-4xl text-fg">Gesture Gaming</h3>
+                        <span class="font-mono text-xs text-muted">05</span>
+                    </div>
+                    <p class="text-muted text-sm md:text-base">Computer vision interface translating physical hand gestures into real-time game controls.</p>
+                </div>
+                <div class="flex justify-between items-end mt-8">
+                    <div class="flex flex-wrap gap-2 font-mono">
+                        <span class="tech-tag">OpenCV</span>
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">CV</span>
+                    </div>
+                    <div class="work-github font-mono text-xs flex items-center gap-2 font-medium">
+                        View Code 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 6 -->
+            <a href="https://github.com/GauravNayak-gn/Telegram-message-forward-bot" target="_blank" rel="noopener noreferrer" class="work-card" data-cursor="hover" aria-label="View Telegram Bot on GitHub">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="display work-title text-3xl md:text-4xl text-fg">Telegram Bot</h3>
+                        <span class="font-mono text-xs text-muted">06</span>
+                    </div>
+                    <p class="text-muted text-sm md:text-base">Decentralized message relay bot with automated forwarding and session management.</p>
+                </div>
+                <div class="flex justify-between items-end mt-8">
+                    <div class="flex flex-wrap gap-2 font-mono">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Telegram API</span>
+                        <span class="tech-tag">Automation</span>
+                    </div>
+                    <div class="work-github font-mono text-xs flex items-center gap-2 font-medium">
+                        View Code 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="py-24 md:py-32 container-pad border-t border-line overflow-hidden">
+        <div class="font-mono text-xs uppercase tracking-widest text-muted mb-16">[ 03 / Professional Data ]</div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 border-b border-line pb-20">
+            <div>
+                <span class="font-mono text-xs text-muted">ROLE</span>
+                <h2 class="display text-3xl md:text-4xl mt-2 text-fg">SDE Intern</h2>
+                <span class="font-mono text-sm text-muted block mt-2">Rhythmflows Solutions</span>
+            </div>
+            <div>
+                <span class="font-mono text-xs text-muted">DURATION</span>
+                <h2 class="display text-3xl md:text-4xl mt-2 text-fg">6 Months</h2>
+                <span class="font-mono text-sm text-muted block mt-2">Jan 2026 - June 2026</span>
+            </div>
+            <div>
+                <span class="font-mono text-xs text-muted">IMPACT</span>
+                <h2 class="display text-3xl md:text-4xl mt-2 text-fg">Banking Infra</h2>
+                <span class="font-mono text-sm text-muted block mt-2">1M+ Transactions Optimized</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-line border border-line rounded-lg overflow-hidden">
+            <!-- Metric 1 -->
+            <div class="metric-card bg-bg p-8 md:p-12 cursor-pointer min-w-0" data-cursor="hover">
+                <div class="font-mono text-xs text-muted mb-8">[ 01 / PERFORMANCE ]</div>
+                <div class="metric-large">99%</div>
+                <div class="mt-8 border-t border-line pt-4">
+                    <h3 class="text-xl mb-2 text-fg">API Latency Reduction</h3>
+                    <p class="text-sm text-muted max-w-md">Identified and fixed N+1 query problems, missing pagination, and absent indexing in report-generation views, reducing time from ~60s to under 500ms on 1M+ transaction reports.</p>
+                </div>
+            </div>
+            
+            <!-- Metric 2 -->
+            <div class="metric-card bg-bg p-8 md:p-12 cursor-pointer min-w-0" data-cursor="hover">
+                <div class="font-mono text-xs text-muted mb-8">[ 02 / SECURITY ]</div>
+                <div class="metric-large">12</div>
+                <div class="mt-8 border-t border-line pt-4">
+                    <h3 class="text-xl mb-2 text-fg">VAPT Vulnerabilities Resolved</h3>
+                    <p class="text-sm text-muted max-w-md">Over a 1-month sprint, resolved SISA audit threats (4 High, 3 Med, 5 Low). Built custom session tracking, RBAC middleware, and API-wide request throttling for PCI-DSS compliance.</p>
+                </div>
+            </div>
+
+            <!-- Metric 3 -->
+            <div class="metric-card bg-bg p-8 md:p-12 cursor-pointer min-w-0" data-cursor="hover">
+                <div class="font-mono text-xs text-muted mb-8">[ 03 / SECRET MGMT ]</div>
+                <div class="metric-large">50+</div>
+                <div class="mt-8 border-t border-line pt-4">
+                    <h3 class="text-xl mb-2 text-fg">Secrets Managed per Client</h3>
+                    <p class="text-sm text-muted max-w-md">Integrated HashiCorp Vault with the Django backend to securely manage 50+ secrets per client, replacing plaintext environment variables as part of PCI-DSS compliance efforts.</p>
+                </div>
+            </div>
+
+            <!-- Metric 4 -->
+            <div class="metric-card bg-bg p-8 md:p-12 cursor-pointer min-w-0" data-cursor="hover">
+                <div class="font-mono text-xs text-muted mb-8">[ 04 / SCALE ]</div>
+                <div class="metric-large">1M+</div>
+                <div class="mt-8 border-t border-line pt-4">
+                    <h3 class="text-xl mb-2 text-fg">Transaction Reports Handled</h3>
+                    <p class="text-sm text-muted max-w-md">Optimized report-generation views to flawlessly process and generate reports for over 1 million live banking transactions without performance degradation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Marquee -->
+    <section id="skills" class="py-24 md:py-32 border-t border-line overflow-hidden">
+        <div class="container-pad mb-12">
+            <h2 class="display text-4xl md:text-6xl text-fg">Technical Stack</h2>
+        </div>
+        
+        <div class="marquee-container">
+            <div class="marquee-track">
+                <span class="skill-item" data-cursor="hover">Python</span>
+                <span class="skill-item" data-cursor="hover">Django</span>
+                <span class="skill-item" data-cursor="hover">FastAPI</span>
+                <span class="skill-item" data-cursor="hover">LangChain</span>
+                <span class="skill-item" data-cursor="hover">pgvector</span>
+                <span class="skill-item" data-cursor="hover">Kafka</span>
+                <span class="skill-item" data-cursor="hover">Docker</span>
+                <span class="skill-item" data-cursor="hover">VAPT</span>
+            </div>
+            <div class="marquee-track" aria-hidden="true">
+                <span class="skill-item" data-cursor="hover">Python</span>
+                <span class="skill-item" data-cursor="hover">Django</span>
+                <span class="skill-item" data-cursor="hover">FastAPI</span>
+                <span class="skill-item" data-cursor="hover">LangChain</span>
+                <span class="skill-item" data-cursor="hover">pgvector</span>
+                <span class="skill-item" data-cursor="hover">Kafka</span>
+                <span class="skill-item" data-cursor="hover">Docker</span>
+                <span class="skill-item" data-cursor="hover">VAPT</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 md:py-32 container-pad border-t border-line">
+        <div class="font-mono text-xs uppercase tracking-widest text-muted mb-8">[ Let's Connect ]</div>
+        <h2 class="display text-[10vw] md:text-[8vw] leading-none mb-12 text-fg">
+            <span class="reveal-mask"><span class="reveal-text">Build something</span></span>
+            <span class="reveal-mask"><span class="reveal-text" style="color: var(--accent); transition-delay: 0.1s;">reliable.</span></span>
+        </h2>
+        <div class="flex flex-col md:flex-row justify-between items-start gap-12">
+            <a href="mailto:gaurav.nayakcr@gmail.com" class="display text-2xl md:text-4xl border-b border-fg pb-2 hover:text-accent transition-colors break-all" data-cursor="hover">
+                gaurav.nayakcr@gmail.com
+            </a>
+            <div class="flex flex-col gap-4 font-mono text-sm">
+                <a href="https://github.com/GauravNayak-gn" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 hover:text-accent transition-colors" data-cursor="hover">
+                    <span class="w-8 h-px bg-muted"></span> GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/gaurav-nayak-gn10/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 hover:text-accent transition-colors" data-cursor="hover">
+                    <span class="w-8 h-px bg-muted"></span> LinkedIn
+                </a>
+                <a href="tel:9325488829" class="flex items-center gap-4 hover:text-accent transition-colors" data-cursor="hover">
+                    <span class="w-8 h-px bg-muted"></span> +91 93254 88829
+                </a>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <footer class="container-pad py-8 border-t border-line flex flex-col md:flex-row justify-between gap-4 font-mono text-xs text-muted">
+        <span>© <span id="year"></span> Gaurav Nayak. All rights reserved.</span>
+        <span>Designed & Engineered in Pune</span>
+    </footer>
+
+    <script>
+        // --- Year Update ---
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // --- Theme Toggle ---
+        const html = document.documentElement;
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+        const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                html.setAttribute('data-theme', 'light');
+                themeToggleBtn.innerHTML = moonIcon; // Show moon to switch to dark
+            } else {
+                html.removeAttribute('data-theme');
+                themeToggleBtn.innerHTML = sunIcon; // Show sun to switch to light
+            }
+        }
+
+        // Initial theme
+        let savedTheme = 'dark';
+        try {
+            savedTheme = localStorage.getItem('theme') || 
+                         (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        } catch (e) {}
+        applyTheme(savedTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            try { localStorage.setItem('theme', newTheme); } catch (e) {}
+        });
+
+        // --- Lenis Smooth Scroll ---
+        let lenis;
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smoothWheel: true,
+            });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+        }
+
+        // --- Custom Cursor Logic ---
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let ringX = mouseX, ringY = mouseY;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            dot.style.transform = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
+        });
+
+        function animateRing() {
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+            ring.style.transform = `translate(${ringX - 18}px, ${ringY - 18}px)`;
+            requestAnimationFrame(animateRing);
+        }
+        animateRing();
+
+        document.querySelectorAll('a, button, [data-cursor="hover"]').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        });
+
+        // --- Kinetic Text Reveal (Intersection Observer) ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.reveal-mask').forEach(el => observer.observe(el));
+
+        // --- Hero Decode Effect ---
+        const decodeText = document.getElementById('decode-text');
+        const originalText = decodeText.textContent;
+        const chars = "!<>-_\\/[]{}—=+*^?#________";
+        let frame = 0;
+        
+        function decodeAnimation() {
+            let output = '';
+            for (let i = 0; i < originalText.length; i++) {
+                const char = originalText[i];
+                if (char === ' ') { output += ' '; continue; }
+                
+                if (frame / 2 > i) {
+                    output += char;
+                } else {
+                    output += chars[Math.floor(Math.random() * chars.length)];
+                }
+            }
+            decodeText.textContent = output;
+            frame++;
+            
+            if (frame <= originalText.length * 2 + 5) {
+                requestAnimationFrame(decodeAnimation);
+            } else {
+                decodeText.textContent = originalText;
+            }
+        }
+        
+        // Start decode only if reduced motion is not preferred
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setTimeout(decodeAnimation, 500);
+        }
+
+        // --- WebGL Generative Noise Background ---
+        const canvas = document.getElementById('fluid-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let time = 0;
+        let targetMouseX = canvas.width / 2;
+        let targetMouseY = canvas.height / 2;
+        let currentMouseX = targetMouseX;
+        let currentMouseY = targetMouseY;
+        let animationId;
+
+        window.addEventListener('mousemove', (e) => {
+            targetMouseX = e.clientX;
+            targetMouseY = e.clientY;
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function getThemeColors() {
+            const isLight = html.getAttribute('data-theme') === 'light';
+            return {
+                bg: isLight ? '#FAFAFA' : '#0A0A0B',
+                accent1: isLight ? 'rgba(79, 70, 229, 0.04)' : 'rgba(79, 70, 229, 0.08)',
+                accent2: isLight ? 'rgba(6, 182, 212, 0.03)' : 'rgba(6, 182, 212, 0.05)',
+                grid: isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.02)'
+            };
+        }
+
+        function drawNoise() {
+            const colors = getThemeColors();
+            currentMouseX += (targetMouseX - currentMouseX) * 0.05;
+            currentMouseY += (targetMouseY - currentMouseY) * 0.05;
+
+            ctx.fillStyle = colors.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const radius = Math.max(100, (canvas.width / 4) + Math.sin(time * 0.5) * 50);
+            const gradient = ctx.createRadialGradient(
+                currentMouseX, currentMouseY, 0, 
+                currentMouseX, currentMouseY, radius
+            );
+            
+            gradient.addColorStop(0, colors.accent1);
+            gradient.addColorStop(1, colors.bg);
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Secondary subtle cyan glow offset
+            const radius2 = Math.max(50, (canvas.width / 6) + Math.cos(time * 0.4) * 30);
+            const gradient2 = ctx.createRadialGradient(
+                window.innerWidth - currentMouseX, window.innerHeight - currentMouseY, 0, 
+                window.innerWidth - currentMouseX, window.innerHeight - currentMouseY, radius2
+            );
+            gradient2.addColorStop(0, colors.accent2);
+            gradient2.addColorStop(1, colors.bg);
+            ctx.fillStyle = gradient2;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = colors.grid;
+            ctx.lineWidth = 1;
+            const gridSize = 80;
+            const offset = Math.sin(time * 0.2) * 10;
+            
+            for(let x = -gridSize; x < canvas.width + gridSize; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x + offset, 0);
+                ctx.lineTo(x + offset, canvas.height);
+                ctx.stroke();
+            }
+            for(let y = -gridSize; y < canvas.height + gridSize; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y + offset);
+                ctx.lineTo(canvas.width, y + offset);
+                ctx.stroke();
+            }
+
+            time += 0.05;
+            animationId = requestAnimationFrame(drawNoise);
+        }
+
+        // Start WebGL only if reduced motion is not preferred
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            drawNoise();
+            
+            // Performance optimization: Pause rendering when tab is inactive
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    cancelAnimationFrame(animationId);
+                } else {
+                    drawNoise();
+                }
+            });
+        } else {
+            // Static background for reduced motion
+            ctx.fillStyle = html.getAttribute('data-theme') === 'light' ? '#FAFAFA' : '#0A0A0B';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</body>
+</html>
